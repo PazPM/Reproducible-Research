@@ -1,0 +1,127 @@
+---
+title: "PA_template"
+author: "Paz Prieto Martín"
+date: "17 de julio de 2014"
+output: html_document
+---
+
+Loading and preprocessing the data
+---
+# Load the data
+```{r}
+activity <- read.csv("~/Desktop/COURSERA R/Reproducible Research/activity.csv", stringsAsFactors=TRUE)
+```
+---
+What is mean total number of steps taken per day?
+---
+# Histogram of the total number of steps taken each day:
+```{r}
+activity$steps<-as.integer(activity$steps)
+hist(with(activity, tapply(steps, list(date), sum)),breaks=61)
+```
+# Mean of steps taken each day:
+```{r}
+tapply(activity$steps, activity$date,mean)
+activityNoNA<-activity[complete.cases(activity),]
+meanNA<-tapply(activityNoNA$steps, activityNoNA$date,mean)
+totalmeanwithNA<-mean(meanNA[complete.cases(meanNA)])
+totalmeanwithNA
+
+```
+# Median number of steps taken each day:
+```{r}
+medianNA<-tapply(activityNoNA$steps, activityNoNA$date,median)
+totalmedianwithNA<-median(medianNA[complete.cases(medianNA)])
+totalmedianwithNA
+```
+What is the average daily activity pattern?
+---
+# time series plot of the average number of steps taken (averaged across all days) versus the 5-minute intervals (5-minute interval (x-axis),average number of steps taken, averaged across all days (y-axis)):
+```{r}
+activityNoNA$interval<-as.factor(activityNoNA$interval)
+activityNoNA$averageacrossdays<-tapply(activityNoNA$steps, activityNoNA$interval,mean)
+plot(activityNoNA$interval,activityNoNA$averageacrossdays, type="l", xlab="5-minute interval", ylab="number of steps averaged across all days", col="green", lwd=2)
+```
+# 5-minute interval that, on average, contains the maximum number of steps:
+```{r}
+activityNoNA$interval[which.max(activityNoNA$averageacrossdays)]
+```
+Imputing missing values
+----
+# Total number of missing values in the dataset (i.e. the total number of rows with NAs)
+```{r}
+nrow(activity)- nrow(activityNoNA)
+```
+# Strategy for imputing missing data:
+# Replace each NA with the average number of steps taken across all days for the specific interval. 
+# actReplNA is a new dataset thaat is equal to the original data but with the missing data filled in.
+```{r}
+actReplNA<-activity
+actReplNA$interval<- as.factor(actReplNA$interval)
+actReplNA$steps<-ifelse(is.na(actReplNA$steps),activityNoNA$averageacrossdays,actReplNA$steps)
+summary(is.na(actReplNA$steps))
+````
+# Histogram of the total number of steps taken each day after missing values were imputed:
+```{r}
+hist(with(actReplNA, tapply(steps, list(date), sum)),breaks=61)
+````
+# Calculate and report the mean total number of steps taken per day:
+```{r}
+meanReplNA<-tapply(actReplNA$steps, actReplNA$date,mean)
+totalmeanReplNA<-mean(meanReplNA)
+totalmeanReplNA
+
+```
+# Calculate and report the median total number of steps taken per day:
+```{r}
+medianReplNA<-tapply(actReplNA$steps, actReplNA$date,median)
+totalmedianReplNA<-median(medianReplNA)
+totalmedianReplNA
+```
+
+#Do these values differ from the estimates from the first part of the assignment? 
+```{r}
+DifferMean<-meanReplNA-meanNA
+DifferMean
+DifferMedian<-medianReplNA-medianNA
+DifferMedian
+```
+No differences were observed by replacing NA's in mean or median. But it was possible to estimate the total daily number of steps for the dates without steps data:
+```{r}
+sumwithNA<-tapply(activityNoNA$steps, activityNoNA$date,sum)
+sumwithNA
+sumReplNA<-tapply(actReplNA$steps, actReplNA$date,sum)
+sumReplNA
+```
+---
+Are there differences in activity patterns between weekdays and weekends?
+---
+# Panel plot comparing the average number of steps taken per 5-minute interval across weekdays and weekends:
+```{r}
+actReplNA$daytype<-weekdays(as.Date(actReplNA$date))
+actReplNA$daytype<-as.factor(actReplNA$daytype)
+actReplNA$day<-factor(c("Weekday","Weekend"))
+for (i in 1:17568)
+        {
+        daytype <- actReplNA$daytype[i]
+        
+        if ((daytype =="sábado") | (daytype=="domingo"))
+                {
+                actReplNA$day[i]<-"Weekend"
+                }
+        else 
+                {
+                actReplNA$day[i]<-"Weekday"
+                 }
+      }  
+dataW<-split(actReplNA, actReplNA$day)
+Weekday<-(dataW[[1]])
+Weekend<-(dataW[[2]])
+Weekday$averageacross<-tapply(Weekday$steps, Weekday$interval,mean)
+
+Weekend$averageacross<-tapply(Weekend$steps, Weekend$interval,mean)
+Data<-rbind(Weekday,Weekend)
+
+library(lattice)
+xyplot(averageacross~interval | day, data=Data, layout=c(1,2), type="l", xlab="5-minute interval", ylab="number of steps")
+````
