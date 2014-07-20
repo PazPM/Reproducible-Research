@@ -7,15 +7,15 @@ output: html_document
 
 Loading and preprocessing the data
 ---
-# Load the data
 
 ```r
 activity <- read.csv("~/Desktop/COURSERA R/Reproducible Research/activity.csv", stringsAsFactors=TRUE)
 ```
 ---
-What is mean total number of steps taken per day?
+# What is mean total number of steps taken per day?
 ---
-# Histogram of the total number of steps taken each day:
+Histogram of the total number of steps taken each day:
+---
 
 ```r
 activity$steps<-as.integer(activity$steps)
@@ -23,7 +23,8 @@ hist(with(activity, tapply(steps, list(date), sum)),breaks=61)
 ```
 
 ![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2.png) 
-# Mean of steps taken each day:
+Mean of steps taken each day:
+---
 
 ```r
 tapply(activity$steps, activity$date,mean)
@@ -64,7 +65,8 @@ totalmeanwithNA
 ```
 ## [1] 37.38
 ```
-# Median number of steps taken each day:
+Median number of steps taken each day:
+---
 
 ```r
 medianNA<-tapply(activityNoNA$steps, activityNoNA$date,median)
@@ -75,9 +77,10 @@ totalmedianwithNA
 ```
 ## [1] 0
 ```
-What is the average daily activity pattern?
+# What is the average daily activity pattern?
 ---
-# time series plot of the average number of steps taken (averaged across all days) versus the 5-minute intervals (5-minute interval (x-axis),average number of steps taken, averaged across all days (y-axis)):
+Time series plot of the average number of steps taken (averaged across all days) versus the 5-minute intervals (5-minute interval (x-axis),average number of steps taken, averaged across all days (y-axis)):
+---
 
 ```r
 activityNoNA$interval<-as.factor(activityNoNA$interval)
@@ -86,7 +89,8 @@ plot(activityNoNA$interval,activityNoNA$averageacrossdays, type="l", xlab="5-min
 ```
 
 ![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5.png) 
-# 5-minute interval that, on average, contains the maximum number of steps:
+5-minute interval that, on average, contains the maximum number of steps:
+---
 
 ```r
 activityNoNA$interval[which.max(activityNoNA$averageacrossdays)]
@@ -96,9 +100,10 @@ activityNoNA$interval[which.max(activityNoNA$averageacrossdays)]
 ## [1] 835
 ## 288 Levels: 0 5 10 15 20 25 30 35 40 45 50 55 100 105 110 115 120 ... 2355
 ```
-Imputing missing values
+# Imputing missing values
 ----
-# Total number of missing values in the dataset (i.e. the total number of rows with NAs)
+Total number of missing values in the dataset (i.e. the total number of rows with NAs)
+---
 
 ```r
 nrow(activity)- nrow(activityNoNA)
@@ -108,8 +113,9 @@ nrow(activity)- nrow(activityNoNA)
 ## [1] 2304
 ```
 # Strategy for imputing missing data:
-# Replace each NA with the average number of steps taken across all days for the specific interval. 
-# actReplNA is a new dataset thaat is equal to the original data but with the missing data filled in.
+Replace each NA with the average number of steps taken across all days for the specific interval. 
+actReplNA is a new dataset thaat is equal to the original data but with the missing data filled in.
+---
 
 ```r
 actReplNA<-activity
@@ -122,14 +128,16 @@ summary(is.na(actReplNA$steps))
 ##    Mode   FALSE    NA's 
 ## logical   17568       0
 ```
-# Histogram of the total number of steps taken each day after missing values were imputed:
+Histogram of the total number of steps taken each day after missing values were imputed:
+---
 
 ```r
 hist(with(actReplNA, tapply(steps, list(date), sum)),breaks=61)
 ```
 
 ![plot of chunk unnamed-chunk-9](figure/unnamed-chunk-9.png) 
-# Calculate and report the mean total number of steps taken per day:
+Calculate and report the mean total number of steps taken per day:
+---
 
 ```r
 meanReplNA<-tapply(actReplNA$steps, actReplNA$date,mean)
@@ -140,7 +148,8 @@ totalmeanReplNA
 ```
 ## [1] 37.38
 ```
-# Calculate and report the median total number of steps taken per day:
+Calculate and report the median total number of steps taken per day:
+---
 
 ```r
 medianReplNA<-tapply(actReplNA$steps, actReplNA$date,median)
@@ -152,7 +161,8 @@ totalmedianReplNA
 ## [1] 0
 ```
 
-#Do these values differ from the estimates from the first part of the assignment? 
+Do these values differ from the estimates from the first part of the assignment? 
+---
 
 ```r
 DifferMean<-meanReplNA-meanNA
@@ -214,6 +224,7 @@ DifferMedian
 ##         NA
 ```
 No differences were observed by replacing NA's in mean or median. But it was possible to estimate the total daily number of steps for the dates without steps data:
+---
 
 ```r
 sumwithNA<-tapply(activityNoNA$steps, activityNoNA$date,sum)
@@ -275,9 +286,12 @@ sumReplNA
 ##      10766
 ```
 ---
-Are there differences in activity patterns between weekdays and weekends?
+# Are there differences in activity patterns between weekdays and weekends?
 ---
-# Panel plot comparing the average number of steps taken per 5-minute interval across weekdays and weekends:
+Yes, there are:
+
+Panel plot comparing the average number of steps taken per 5-minute interval across weekdays and weekends:
+---
 
 ```r
 actReplNA$daytype<-weekdays(as.Date(actReplNA$date))
